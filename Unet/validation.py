@@ -15,7 +15,7 @@ transform = transforms.Compose([
     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 ])
 
-state_dict = torch.load('unet_epoch_1.pth', map_location=torch.device('cpu'))
+state_dict = torch.load('senior-design-proj/Unet/unet_epoch_10.pth', map_location=torch.device('cpu'))
 model = UNet(num_classes=15)
 model.load_state_dict(state_dict)
 
@@ -30,15 +30,15 @@ img_tensor = transform(image)
 img_tensor = img_tensor[None, :, :, :]
 
 output = model(img_tensor)
-for i in range(15):
-    print("Class", i, "min:", output[0, i].min().item(), "max:", output[0, i].max().item())
-# _, output = get_img_label_tensor(1)
 output = output.squeeze()
 output = output.detach().numpy()
 print(output.shape)
 
-# np.save("output.npy", output)
+np.save("output.npy", output)
 # output = np.load("output.npy")
+# output = output.squeeze()
+
+
 
 '''
 valid_images_folder = 'yolo/images/validation'
