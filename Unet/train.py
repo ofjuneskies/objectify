@@ -11,6 +11,8 @@ from unet import UNet
 def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epochs, device):
     model.to(device)
     model.train()  # Set the model to training mode
+    prev_val_loss = 99.9
+    val_loss = 0.0
 
     for epoch in range(num_epochs):
         running_loss = 0.0
@@ -33,9 +35,6 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epo
         epoch_loss = running_loss / len(train_loader.dataset)
         print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {epoch_loss:.4f}")
 
-        # Save the model after each epoch
-        torch.save(model.state_dict(), f"unet_epoch_{epoch + 1}.pth")
-
         # Check the model performance on the validation set
         model.eval()  # Set the model to evaluation mode
         with torch.no_grad():
@@ -50,6 +49,16 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epo
 
             val_loss /= len(valid_loader)
             print(f"Validation Loss: {val_loss:.4f}")
+
+        # Check for early stopping
+        if val_loss > prev_val_loss:
+            print("Validation loss increased. Stopping training.")
+            break
+        else:
+            prev_val_loss = val_loss
+
+        # Save the model after each epoch
+        torch.save(model.state_dict(), f"unet_epoch_{epoch + 1}.pth")
 
     print("Training complete.")
 
@@ -75,7 +84,7 @@ optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr
 criterion = nn.CrossEntropyLoss()  # Use CrossEntropyLoss for multi-class segmentation
 
 # Training parameters
-num_epochs = 10
+num_epochs = 100
 
 # Transform for data augmentation
 transform = transforms.Compose([
