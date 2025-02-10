@@ -24,15 +24,16 @@ criterion = nn.CrossEntropyLoss()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.eval()
 
-with torch.no_grad():
-    val_loss = 0.0
-    for images, labels in tqdm(valid_loader):
-        images = images.to(device)
-        labels = labels.to(device)
+if __name__ == "__main__":
+    with torch.no_grad():
+        val_loss = 0.0
+        for images, labels in tqdm(valid_loader):
+            images = images.to(device)
+            labels = labels.to(device)
 
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        val_loss += loss.item() * images.size(0)
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            val_loss += loss.item() * images.size(0)
 
-    val_loss /= len(valid_loader)
-    print(f"Validation Loss: {val_loss:.4f}")
+        val_loss /= len(valid_loader)
+        print(f"Validation Loss: {val_loss:.4f}")

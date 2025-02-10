@@ -36,7 +36,7 @@ image = Image.open(image_path).convert("RGB")
 # np.save("output.npy", output)
 
 
-output = np.load("senior-design-proj/Unet/output.npy")
+output = np.load("senior-design-proj/Unet/output2.npy")
 # output = output.squeeze()
 #fig, axes = plt.subplots(1,1,figsize = (15,9))
 # axes = axes.flatten()
