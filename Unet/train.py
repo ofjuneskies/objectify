@@ -9,6 +9,7 @@ from unet import UNet
 
 # Define the training function
 def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epochs, device):
+    f = open("training.txt", "a")
     model.to(device)
     model.train()  # Set the model to training mode
     prev_val_loss = 99.9
@@ -34,6 +35,7 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epo
         # Calculate average loss for the epoch
         epoch_loss = running_loss / len(train_loader.dataset)
         print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {epoch_loss:.4f}")
+        f.write(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {epoch_loss:.4f}\n")
 
         # Check the model performance on the validation set
         model.eval()  # Set the model to evaluation mode
@@ -49,6 +51,7 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epo
 
             val_loss /= len(valid_loader)
             print(f"Validation Loss: {val_loss:.4f}")
+            f.write(f"Validation Loss: {val_loss:.4f}\n")
 
         # Check for early stopping
         if val_loss > prev_val_loss:
@@ -61,8 +64,9 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epo
         torch.save(model.state_dict(), f"unet_epoch_{epoch + 1}.pth")
 
     print("Training complete.")
+    f.close()
 
-model = UNet(num_classes=15)
+model = UNet(num_classes=16)
 
 # Check for GPU availability
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

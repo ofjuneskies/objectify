@@ -15,31 +15,28 @@ transform = transforms.Compose([
     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 ])
 
-# state_dict = torch.load('senior-design-proj/Unet/unet_epoch_10.pth', map_location=torch.device('cpu'))
-# model = UNet(num_classes=15)
-# model.load_state_dict(state_dict)
+state_dict = torch.load('senior-design-proj/Unet/unet_epoch_100.pth', map_location=torch.device('cpu'))
+model = UNet(num_classes=16)
+model.load_state_dict(state_dict)
 
-# criterion = nn.CrossEntropyLoss()
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# model.eval()
+criterion = nn.CrossEntropyLoss()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.eval()
 
-# # image_path = "yolo/images/validation/image2395.png"
-image_path = "yolo/images/train/image1.png"
+# image_path = "yolo/images/validation/image2395.png"
+image_path = "dataset/images/train/image1.png"
 image = Image.open(image_path).convert("RGB")
-# img_tensor = transform(image)
-# img_tensor = img_tensor[None, :, :, :]
+img_tensor = transform(image)
+img_tensor = img_tensor[None, :, :, :]
 
-# output = model(img_tensor)
-# output = output.squeeze()
-# output = output.detach().numpy()
+output = model(img_tensor)
+output = output.squeeze()
+output = output.detach().numpy()
 
 # np.save("output.npy", output)
 
 
-output = np.load("senior-design-proj/Unet/output2.npy")
-# output = output.squeeze()
-#fig, axes = plt.subplots(1,1,figsize = (15,9))
-# axes = axes.flatten()
+# output = np.load("senior-design-proj/Unet/output2.npy")
 
 output_t = torch.from_numpy(output)
 probabilities = torch.softmax(output_t, dim=0)
@@ -51,7 +48,7 @@ confidence = torch.max(probabilities, dim=0)[0].numpy()
 segmentation_mask = np.argmax(probabilities.numpy(), axis=0)
 
 # For thresholding instead (uncomment below):
-threshold = 0.7
+threshold = 0.9
 alpha = np.where(confidence >= threshold, 0.5, 0.0)  # Hard transparency cutoff
 
 plt.imshow(image)

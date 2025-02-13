@@ -11,13 +11,13 @@ transform = transforms.Compose([
     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 ])
 
-valid_images_folder = 'yolo/images/validation'
-valid_labels_folder = 'yolo/labels/validation'
+valid_images_folder = 'dataset/images/validation'
+valid_labels_folder = 'dataset/labels/validation'
 valid_dataset = ForgeDataset(images_folder=valid_images_folder, labels_folder=valid_labels_folder, transform=transform)
 valid_loader = DataLoader(valid_dataset, batch_size=4, shuffle=False, num_workers=4)
 
-state_dict = torch.load('senior-design-proj/Unet/unet_epoch_10.pth', map_location=torch.device('cpu'))
-model = UNet(num_classes=15)
+state_dict = torch.load('senior-design-proj/Unet/unet_epoch_100.pth', map_location=torch.device('cpu'))
+model = UNet(num_classes=16)
 model.load_state_dict(state_dict)
 
 criterion = nn.CrossEntropyLoss()
@@ -37,3 +37,6 @@ if __name__ == "__main__":
 
         val_loss /= len(valid_loader)
         print(f"Validation Loss: {val_loss:.4f}")
+
+
+# Validation Loss: 0.1212
