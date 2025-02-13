@@ -37,15 +37,24 @@ def get_img_label_tensor(id, image_path, label_path, transform=None):
     
     # Get the label tensor
     polygons = get_polygon(label_path)
-    label_tensor = torch.zeros(WIDTH, HEIGHT, NUM_CLASSES)
+    label_tensor = torch.zeros(WIDTH, HEIGHT, NUM_CLASSES + 1)
+    background_tensor = torch.zeros(WIDTH, HEIGHT)
     for polygon in polygons:
         label_tensor[:, :, polygon[0]] = conv_polygon_to_tensor(polygon[1])
     label_tensor = torch.transpose(label_tensor, 0, 2)
     label_tensor = torch.transpose(label_tensor, 1, 2)
+
+    for class_id in range(NUM_CLASSES):
+        background_tensor = torch.logical_or(background_tensor, label_tensor[class_id, :, :])   
+    label_tensor[NUM_CLASSES, :, :] = (~background_tensor).to(dtype=torch.float)
     return (img_tensor, label_tensor)
 
 if __name__ == "__main__":
-    tup = get_img_label_tensor(0)
+    tup = get_img_label_tensor(0, './dataset/images/train/image1.png', './dataset/labels/train/image1.txt')
     print(tup)
     print(tup[0].shape)
     print(tup[1].shape)
+    print(tup[1][15, :, :].shape)
+    #torch.save(tup[1][15, :, :], "tensor.txt")
+    np.savetxt("binary_tensor.txt", tup[1][15, :, :].numpy(), fmt="%d")
+
