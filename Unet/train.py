@@ -49,7 +49,7 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epo
                 loss = criterion(outputs, labels)
                 val_loss += loss.item() * images.size(0)
 
-            val_loss /= len(valid_loader)
+            val_loss /= len(valid_loader.dataset)
             print(f"Validation Loss: {val_loss:.4f}")
             f.write(f"Validation Loss: {val_loss:.4f}\n")
 
@@ -85,7 +85,8 @@ for param in model.encoder5.parameters():
 
 # Define the loss function and optimizer
 optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4)
-criterion = nn.CrossEntropyLoss()  # Use CrossEntropyLoss for multi-class segmentation
+w = torch.tensor([0.902, 0.796, 0.851, 0.801, 0.866, 0.787, 0.848, 0.844, 0.426, 0.872, 1.0, 0.846, 0.826, 0.418, 0.207, 0.02]).to(device)
+criterion = nn.CrossEntropyLoss(weight=w)
 
 # Training parameters
 num_epochs = 100

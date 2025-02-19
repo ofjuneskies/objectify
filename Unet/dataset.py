@@ -29,10 +29,5 @@ class ForgeDataset(Dataset):
     def __getitem__(self, idx):
         image_path = self.image_files[idx]
         label_path = self.label_files[idx]
-        try:
-            image, label = get_img_label_tensor(idx, image_path, label_path, self.transform)
-            return image, label
-        except FileNotFoundError as e:
-            image = torch.zeros(3, 640, 640)
-            label = torch.zeros(15, 640, 640)
-            return image, label
+        image, label = get_img_label_tensor(idx, image_path, label_path, self.transform)
+        return image, label
