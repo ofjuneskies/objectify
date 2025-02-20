@@ -20,7 +20,9 @@ state_dict = torch.load('senior-design-proj/Unet/unet_epoch_100.pth', map_locati
 model = UNet(num_classes=16)
 model.load_state_dict(state_dict)
 
-criterion = nn.CrossEntropyLoss()
+w = torch.tensor([0.902, 0.796, 0.851, 0.801, 0.866, 0.787, 0.848, 0.844, 0.426, 0.872, 1.0, 0.846, 0.826, 0.418, 0.207, 0.02])
+criterion = nn.CrossEntropyLoss(weight=w)
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.eval()
 

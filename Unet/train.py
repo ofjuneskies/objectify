@@ -54,11 +54,11 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epo
             f.write(f"Validation Loss: {val_loss:.4f}\n")
 
         # Check for early stopping
-        if val_loss > prev_val_loss:
-            print("Validation loss increased. Stopping training.")
-            break
-        else:
-            prev_val_loss = val_loss
+        ##if val_loss > prev_val_loss:
+        ##    print("Validation loss increased. Stopping training.")
+        ##    break
+        ##else:
+        ##    prev_val_loss = val_loss
 
         # Save the model after each epoch
         torch.save(model.state_dict(), f"unet_epoch_{epoch + 1}.pth")
@@ -85,7 +85,10 @@ for param in model.encoder5.parameters():
 
 # Define the loss function and optimizer
 optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4)
-criterion = nn.CrossEntropyLoss()  # Use CrossEntropyLoss for multi-class segmentation
+w = torch.tensor([0.902, 0.796, 0.851, 0.801, 0.866, 0.787, 0.848, 0.844, 0.426, 0.872, 1.0, 0.846, 0.826, 0.418, 0.207, 0.02]).to(device)
+criterion = nn.CrossEntropyLoss(weight=w)
+
+
 
 # Training parameters
 num_epochs = 100
@@ -100,13 +103,13 @@ transform = transforms.Compose([
 ])
 
 # Create the dataset and dataloader
-train_images_folder = '/kaggle/input/forge-2024/yolo/images/train'
-train_labels_folder = '/kaggle/input/forge-2024/yolo/labels/train'
+train_images_folder = './dataset/images/train'
+train_labels_folder = './dataset/labels/train'
 train_dataset = ForgeDataset(images_folder=train_images_folder, labels_folder=train_labels_folder, transform=transform)
 train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True, num_workers=4)
 
-valid_images_folder = '/kaggle/input/forge-2024/yolo/images/validation'
-valid_labels_folder = '/kaggle/input/forge-2024/yolo/labels/validation'
+valid_images_folder = './dataset/images/validation'
+valid_labels_folder = './dataset/labels/validation'
 valid_dataset = ForgeDataset(images_folder=valid_images_folder, labels_folder=valid_labels_folder, transform=transform)
 valid_loader = DataLoader(valid_dataset, batch_size=16, shuffle=False, num_workers=4)
 
