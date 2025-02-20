@@ -21,6 +21,8 @@ from torchvision import transforms
 import matplotlib.pyplot as plt
 from PIL import Image
 
+from dataset import ForgeDataset
+
 
 if torch.cuda.is_available():
     torch.backends.cudnn.deterministic = True
@@ -31,16 +33,16 @@ if torch.cuda.is_available():
 # Hyperparameters
 RANDOM_SEED = 1
 LEARNING_RATE = 0.001
-BATCH_SIZE = 128
-NUM_EPOCHS = 10
+BATCH_SIZE = 16
+NUM_EPOCHS = 100
 
 # Architecture
 NUM_FEATURES = 28*28
-NUM_CLASSES = 10
+NUM_CLASSES = 16
 
 # Other
-DEVICE = "mps" #cuda:2 is not mac friendly
-GRAYSCALE = True
+DEVICE = "cuda" #cuda:2 is not mac friendly
+GRAYSCALE = False
 STRIDE = 2
 
 #################################################### MNIST DATASET ####################################################
@@ -48,23 +50,28 @@ STRIDE = 2
 
 # Note transforms.ToTensor() scales input images
 # to 0-1 range
-train_dataset = datasets.MNIST(root='data', 
-                               train=True, 
-                               transform=transforms.ToTensor(),
-                               download=True)
 
-test_dataset = datasets.MNIST(root='data', 
-                              train=False, 
-                              transform=transforms.ToTensor())
+transform = transforms.Compose([
+    transforms.RandomApply([transforms.ColorJitter(contrast=0.5)], p=1),
+    transforms.RandomApply([transforms.ColorJitter(brightness=0.5)], p=1),
+    transforms.RandomApply([transforms.GaussianBlur(kernel_size=(21, 21))], p=1),
+    transforms.ToTensor(),
+    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))  # Normalize the image
+])
+
+train_images_folder = './dataset/images/train'
+train_labels_folder = './dataset/labels/train'
+
+train_dataset = ForgeDataset(images_folder=train_images_folder, labels_folder=train_labels_folder, transform=transform)
+train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True, num_workers=4)
 
 
-train_loader = DataLoader(dataset=train_dataset, 
-                          batch_size=BATCH_SIZE, 
-                          shuffle=True)
+valid_images_folder = './dataset/images/validation'
+valid_labels_folder = './dataset/labels/validation'
 
-test_loader = DataLoader(dataset=test_dataset, 
-                         batch_size=BATCH_SIZE, 
-                         shuffle=False)
+test_dataset = ForgeDataset(images_folder=valid_images_folder, labels_folder=valid_labels_folder, transform=transform)
+test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False, num_workers=4)
+
 
 # Checking the dataset
 for images, labels in train_loader:  
