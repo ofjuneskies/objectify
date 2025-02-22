@@ -6,14 +6,12 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from dataset import ForgeDataset
 from unet import UNet
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 # Define the training function
-def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epochs, device):
+def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epochs, device, scheduler):
     f = open("training.txt", "a")
     model.to(device)
-    model.train()  # Set the model to training mode
-    prev_val_loss = 99.9
-    val_loss = 0.0
 
     for epoch in range(num_epochs):
         running_loss = 0.0
@@ -38,9 +36,9 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epo
         f.write(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {epoch_loss:.4f}\n")
 
         # Check the model performance on the validation set
-        model.eval()  # Set the model to evaluation mode
+        model.eval() # Set the model to evaluation mode
+        val_loss = 0.0
         with torch.no_grad():
-            val_loss = 0.0
             for images, labels in valid_loader:
                 images = images.to(device)
                 labels = labels.to(device)
@@ -53,12 +51,8 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, num_epo
             print(f"Validation Loss: {val_loss:.4f}")
             f.write(f"Validation Loss: {val_loss:.4f}\n")
 
-        # Check for early stopping
-        ##if val_loss > prev_val_loss:
-        ##    print("Validation loss increased. Stopping training.")
-        ##    break
-        ##else:
-        ##    prev_val_loss = val_loss
+        scheduler.step(val_loss)
+        print(f"Learning rate: {optimizer.param_groups[0]['lr']}")
 
         # Save the model after each epoch
         torch.save(model.state_dict(), f"unet_epoch_{epoch + 1}.pth")
@@ -84,7 +78,9 @@ for param in model.encoder5.parameters():
     param.requires_grad = False
 
 # Define the loss function and optimizer
-optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4)
+optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.01)
+scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
+
 w = torch.tensor([0.902, 0.796, 0.851, 0.801, 0.866, 0.787, 0.848, 0.844, 0.426, 0.872, 1.0, 0.846, 0.826, 0.418, 0.207, 0.02]).to(device)
 criterion = nn.CrossEntropyLoss(weight=w)
 
@@ -112,4 +108,4 @@ valid_dataset = ForgeDataset(images_folder=valid_images_folder, labels_folder=va
 valid_loader = DataLoader(valid_dataset, batch_size=16, shuffle=False, num_workers=4)
 
 # Train the model
-train_model(model, train_loader, valid_loader, criterion, optimizer, num_epochs, device)
+train_model(model, train_loader, valid_loader, criterion, optimizer, num_epochs, device, scheduler)

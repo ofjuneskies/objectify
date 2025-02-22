@@ -23,7 +23,7 @@ criterion = nn.CrossEntropyLoss()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.eval()
 
-image_path = "dataset/images/validation/image2400.png"
+image_path = "dataset/images/validation/image2420.png"
 # image_path = "dataset/images/train/image1.png"
 image = Image.open(image_path).convert("RGB")
 img_tensor = transform(image)
