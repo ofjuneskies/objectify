@@ -15,7 +15,7 @@ transform = transforms.Compose([
     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 ])
 
-state_dict = torch.load('senior-design-proj/Unet/unet_epoch_100.pth', map_location=torch.device('cpu'))
+state_dict = torch.load('senior-design-proj/Unet/unet_v3.pth', map_location=torch.device('cpu'))
 model = UNet(num_classes=16)
 model.load_state_dict(state_dict)
 
@@ -23,8 +23,8 @@ criterion = nn.CrossEntropyLoss()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.eval()
 
-# image_path = "yolo/images/validation/image2395.png"
-image_path = "dataset/images/train/image1.png"
+image_path = "dataset/images/validation/image2420.png"
+# image_path = "dataset/images/train/image1.png"
 image = Image.open(image_path).convert("RGB")
 img_tensor = transform(image)
 img_tensor = img_tensor[None, :, :, :]
@@ -36,7 +36,7 @@ output = output.detach().numpy()
 # np.save("output.npy", output)
 
 
-# output = np.load("senior-design-proj/Unet/output2.npy")
+# output = np.load("senior-design-proj/Unet/output.npy")
 
 output_t = torch.from_numpy(output)
 probabilities = torch.softmax(output_t, dim=0)
@@ -44,13 +44,14 @@ probabilities = torch.softmax(output_t, dim=0)
 # Compute confidence (max probability) for each pixel
 confidence = torch.max(probabilities, dim=0)[0].numpy()
 
-# Generate segmentation mask
 segmentation_mask = np.argmax(probabilities.numpy(), axis=0)
 
-# For thresholding instead (uncomment below):
 threshold = 0.9
-alpha = np.where(confidence >= threshold, 0.5, 0.0)  # Hard transparency cutoff
+# alpha = np.where(confidence >= threshold, 0.5, 0.0)  # Hard transparency cutoff
+# background is the 15th class
+alpha = np.where(segmentation_mask == 15, 0.0, 0.5)
 
+plt.figure(figsize=(8, 8))
 plt.imshow(image)
 plt.imshow(segmentation_mask, cmap="jet", alpha=alpha)  # Apply alpha mask
 plt.colorbar()
