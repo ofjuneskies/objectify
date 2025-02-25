@@ -19,15 +19,15 @@ transform = transforms.Compose([
     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 ])
 
-valid_images_folder = 'C:/Users/jenny/OneDrive/Projects/UAV/senior-design-proj/Unet/yolo/images/validation'
-valid_labels_folder = 'C:/Users/jenny/OneDrive/Projects/UAV/senior-design-proj/Unet/yolo/labels/validation'
+valid_images_folder = 'dataset/images/validation'
+valid_labels_folder = 'dataset/labels/validation'
 valid_dataset = ForgeDataset(images_folder=valid_images_folder, labels_folder=valid_labels_folder, transform=transform)
 valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, num_workers=4)
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-state_dict = torch.load('C:/Users/jenny/OneDrive/Projects/UAV/senior-design-proj/Unet/unet_v5.pth', map_location=torch.device(device))
+state_dict = torch.load('senior-design-proj/Unet/unet_v5.pth', map_location=torch.device(device))
 model = UNet(num_classes=16).to(device)
 model.load_state_dict(state_dict)
 
@@ -59,19 +59,24 @@ if __name__ == "__main__":
             labels = labels.to(device)
 
             output = model(images)
-            # for i in range(16):
-                # preds = torch.softmax(output[i, :, :], dim=0)
 
-                # preds = preds.long()
-                # preds = F.one_hot(preds, 1)
+            output = output.squeeze()
+            output = output.detach().numpy()
+            output_t = torch.from_numpy(output)
+            probabilities = torch.softmax(output_t, dim=0)
+            segmentation_mask = np.argmax(probabilities.numpy(), axis=0)
+            segmentation_mask_tensor = torch.from_numpy(segmentation_mask).to(torch.int64)
 
-                # target = labels[i, :, :].long()
-                # target = F.one_hot(target, 1)
+            # Convert to one-hot encoding
+            one_hot_tensor = torch.nn.functional.one_hot(segmentation_mask_tensor, num_classes=16)
 
-                # miou = MeanIoU(num_classes=1).to(device)
-                # iou += miou(preds, target)
+            # If needed, convert to float or other dtype
+            one_hot_tensor = one_hot_tensor.float()
+            one_hot_tensor = one_hot_tensor.permute(2, 0, 1).unsqueeze(0)  # Shape: (1, 16, H, W)
 
-            iou += calculate_iou(output.cpu().numpy(), labels.cpu().numpy())
+            iou += calculate_iou(one_hot_tensor.cpu().numpy(), labels.cpu().numpy())
+            print(f"IOU: {iou:.4f}")
+            break
 
         meanMIOU = iou / len(valid_loader)
         print(f"Mean MIOU: {meanMIOU:.4f}")

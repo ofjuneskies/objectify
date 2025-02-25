@@ -36,3 +36,37 @@ sorted_dict = dict(sorted(normalized_weights.items(), key=lambda item: int(item[
 print("Normalized Weights:", [round(v, 3) for k, v in sorted_dict.items()])
 
 print("Min Weight:", min(normalized_weights.values()))
+
+import matplotlib.pyplot as plt
+
+# Extract keys and values
+weights = dict(sorted(class_frequencies.items(), key=lambda item: int(item[0])))
+class_names = {
+    0: "mannequin",
+    1: "suitcase",
+    2: "tennisracket",
+    3: "boat",
+    4: "stopsign",
+    5: "plane",
+    6: "baseballbat",
+    7: "bus",
+    8: "mattress",
+    9: "skis",
+    10: "umbrella",
+    11: "snowboard",
+    12: "motorcycle",
+    13: "car",
+    14: "sportsball"
+}
+keys = list(class_names.values())
+values = list(weights.values())
+
+# Create the bar graph
+plt.figure(figsize=(6, 6))
+plt.bar(keys, values)
+plt.xlabel('Classes')
+plt.ylabel('Instances')
+plt.xticks(rotation=90)
+plt.title('Class Frequency')
+plt.tight_layout()
+plt.show()

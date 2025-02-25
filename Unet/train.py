@@ -78,8 +78,8 @@ for param in model.encoder5.parameters():
     param.requires_grad = False
 
 # Define the loss function and optimizer
-optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.01)
-scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
+optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4)
+scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.05, patience=15)
 
 w = torch.tensor([0.902, 0.796, 0.851, 0.801, 0.866, 0.787, 0.848, 0.844, 0.426, 0.872, 1.0, 0.846, 0.826, 0.418, 0.207, 0.02]).to(device)
 criterion = nn.CrossEntropyLoss(weight=w)
