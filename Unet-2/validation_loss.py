@@ -16,7 +16,7 @@ valid_labels_folder = 'dataset/labels/validation'
 valid_dataset = ForgeDataset(images_folder=valid_images_folder, labels_folder=valid_labels_folder, transform=transform)
 valid_loader = DataLoader(valid_dataset, batch_size=4, shuffle=False, num_workers=4)
 
-state_dict = torch.load('senior-design-proj/Unet-2/unet_epoch_100_2.pth', map_location=torch.device('cpu'))
+state_dict = torch.load('senior-design-proj/Unet-2/unet_v2.pth', map_location=torch.device('cpu'))
 model = UNet(num_classes=15)
 model.load_state_dict(state_dict)
 
@@ -35,8 +35,8 @@ if __name__ == "__main__":
             loss = criterion(outputs, labels)
             val_loss += loss.item() * images.size(0)
 
-        val_loss /= len(valid_loader)
+        val_loss /= len(valid_loader.dataset)
         print(f"Validation Loss: {val_loss:.4f}")
 
 
-# Validation Loss: 0.1350
+# Validation Loss: 0.0338
