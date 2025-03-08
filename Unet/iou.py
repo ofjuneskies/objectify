@@ -24,7 +24,7 @@ valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, num_worker
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-state_dict = torch.load('senior-design-proj/Unet/unet_v3.pth', map_location=torch.device(device))
+state_dict = torch.load('senior-design-proj/Unet/unet_v8.pth', map_location=torch.device(device))
 model = UNet(num_classes=16).to(device)
 model.load_state_dict(state_dict)
 
@@ -79,77 +79,63 @@ def calculate_map50(pred_mask, gt_mask):
         return 1 if iou >= 0.5 else 0
 
 if __name__ == "__main__":
-    # tensor of 0's
-    # pred_class_mask = torch.zeros((256, 256)).cpu().numpy()
-    # gt_class_mask = torch.zeros((256, 256)).cpu().numpy()
-    # acc, prec, rec = calculate_metrics(pred_class_mask, gt_class_mask)
-    # map50_score = calculate_map50(pred_class_mask, gt_class_mask)
-    # print(f"Accuracy: {acc:.4f}, Precision: {prec:.4f}, Recall: {rec:.4f}, mAP@50: {map50_score:.4f}")
-
     with torch.no_grad():
+        class_metrics = {i: {'accuracy': 0.0, 'precision': 0.0, 'recall': 0.0, 'map50': 0.0} for i in range(15)}
         total_iou = 0.0
-        total_accuracy = 0.0
-        total_precision = 0.0
-        total_recall = 0.0
-        total_map50 = 0.0
         
         for images, labels in tqdm(valid_loader):
             images = images.to(device)
             labels = labels.to(device)
-
             output = model(images)
-
             output = output.squeeze()
             output = output.detach().numpy()
             output_t = torch.from_numpy(output)
             probabilities = torch.softmax(output_t, dim=0)
             segmentation_mask = np.argmax(probabilities.numpy(), axis=0)
             segmentation_mask_tensor = torch.from_numpy(segmentation_mask).to(torch.int64)
-
-            # Convert to one-hot encoding
+            
             one_hot_tensor = torch.nn.functional.one_hot(segmentation_mask_tensor, num_classes=16)
-
-            # If needed, convert to float or other dtype
             one_hot_tensor = one_hot_tensor.float()
-            one_hot_tensor = one_hot_tensor.permute(2, 0, 1).unsqueeze(0)  # Shape: (1, 16, H, W)
+            one_hot_tensor = one_hot_tensor.permute(2, 0, 1).unsqueeze(0)
 
-            # Calculate metrics for each class
-            batch_accuracy = []
-            batch_precision = []
-            batch_recall = []
-            batch_map50 = []
-
-            for class_idx in range(16):
+            for class_idx in range(15):
                 pred_class_mask = one_hot_tensor[0][class_idx].cpu().numpy()
                 gt_class_mask = labels[0][class_idx].cpu().numpy()
-
-                # Calculate metrics for the current class
+                
                 acc, prec, rec = calculate_metrics(pred_class_mask, gt_class_mask)
                 map50_score = calculate_map50(pred_class_mask, gt_class_mask)
-
-                batch_accuracy.append(acc)
-                batch_precision.append(prec)
-                batch_recall.append(rec)
-                batch_map50.append(map50_score)
-
-            # Average metrics across all classes in the batch
-            total_accuracy += np.mean(batch_accuracy)
-            total_precision += np.mean(batch_precision)
-            total_recall += np.mean(batch_recall)
-            total_map50 += np.mean(batch_map50)
-
-            # Calculate IoU for the batch
+                iou = calculate_iou(pred_class_mask, gt_class_mask)
+                
+                class_metrics[class_idx]['accuracy'] += acc
+                class_metrics[class_idx]['precision'] += prec
+                class_metrics[class_idx]['recall'] += rec
+                class_metrics[class_idx]['map50'] += map50_score
             total_iou += calculate_iou(one_hot_tensor.cpu().numpy(), labels.cpu().numpy())
 
-        # Compute mean metrics across all batches
-        mean_accuracy = total_accuracy / len(valid_loader)
-        mean_precision = total_precision / len(valid_loader)
-        mean_recall = total_recall / len(valid_loader)
-        mean_map50 = total_map50 / len(valid_loader)
-        mean_iou = total_iou / len(valid_loader)
+        # Calculate and print mean metrics for each class
+        print("Metrics for each class:")
+        for class_idx in range(15):
+            mean_accuracy = class_metrics[class_idx]['accuracy'] / len(valid_loader)
+            mean_precision = class_metrics[class_idx]['precision'] / len(valid_loader)
+            mean_recall = class_metrics[class_idx]['recall'] / len(valid_loader)
+            mean_map50 = class_metrics[class_idx]['map50'] / len(valid_loader)
+            
+            print(f"Class {class_idx}:")
+            print(f"  Mean Accuracy: {mean_accuracy:.4f}")
+            print(f"  Mean Precision: {mean_precision:.4f}")
+            print(f"  Mean Recall: {mean_recall:.4f}")
+            print(f"  Mean mAP@50: {mean_map50:.4f}")
 
-        print(f"Mean IOU: {mean_iou:.4f}")
-        print(f"Mean Accuracy: {mean_accuracy:.4f}")
-        print(f"Mean Precision: {mean_precision:.4f}")
-        print(f"Mean Recall: {mean_recall:.4f}")
-        print(f"Mean mAP@50: {mean_map50:.4f}")
+        # Calculate and print overall mean metrics
+        overall_mean_iou = total_iou / len(valid_loader)
+        overall_mean_accuracy = sum(class_metrics[i]['accuracy'] for i in range(15)) / (15 * len(valid_loader))
+        overall_mean_precision = sum(class_metrics[i]['precision'] for i in range(15)) / (15 * len(valid_loader))
+        overall_mean_recall = sum(class_metrics[i]['recall'] for i in range(15)) / (15 * len(valid_loader))
+        overall_mean_map50 = sum(class_metrics[i]['map50'] for i in range(15)) / (15 * len(valid_loader))
+
+        print("\nOverall Mean Metrics:")
+        print(f"Mean IOU: {overall_mean_iou:.4f}")
+        print(f"Mean Accuracy: {overall_mean_accuracy:.4f}")
+        print(f"Mean Precision: {overall_mean_precision:.4f}")
+        print(f"Mean Recall: {overall_mean_recall:.4f}")
+        print(f"Mean mAP@50: {overall_mean_map50:.4f}")

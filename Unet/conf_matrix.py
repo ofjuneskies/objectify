@@ -30,7 +30,7 @@ model = UNet(num_classes=16).to(device)
 model.load_state_dict(state_dict)
 model.eval()
 
-def generate_confusion_matrix(num_classes=15):
+def generate_confusion_matrix(num_classes):
     # Initialize confusion matrix
     conf_matrix = np.zeros((num_classes, num_classes), dtype=np.int64)
     
@@ -74,28 +74,33 @@ def plot_confusion_matrix(conf_matrix, class_names=None):
     if class_names is None:
         class_names = [f'Class {i}' for i in range(len(conf_matrix))]
     
+    # Convert to percentages by dividing by row sums (true class totals)
+    conf_matrix_percent = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
+    # Replace NaN with 0 (in case there are rows with sum=0)
+    conf_matrix_percent = np.nan_to_num(conf_matrix_percent)
+    
     plt.figure(figsize=(12, 10))
     sns.heatmap(
-        conf_matrix, 
-        annot=True, 
-        fmt='d', 
+        conf_matrix_percent,
+        annot=True,
+        fmt='.2f',  # Changed format to show float values with 2 decimal places
         cmap='Blues',
         xticklabels=class_names,
         yticklabels=class_names
     )
+    
     plt.xlabel('Predicted')
     plt.ylabel('True')
-    plt.title('Confusion Matrix')
+    plt.title('Confusion Matrix (Normalized) v3')
     plt.tight_layout()
-    plt.savefig('confusion_matrix.png')
+    plt.savefig('confusion_matrix_normalized v3.png')
     plt.show()
 
 if __name__ == "__main__":
     # Generate confusion matrix
-    conf_matrix = generate_confusion_matrix(num_classes=15)
+    conf_matrix = generate_confusion_matrix(num_classes=16)
     
-    # You can define class names here if available
-    class_names = [f'Class {i}' for i in range(15)]
+    class_names = ["mannequin", "suitcase", "tennisracket", "boat", "stopsign", "plane", "baseballbat", "bus", "mattress", "skis", "umbrella", "snowboard", "motorcycle", "car", "sportsball", "background"]
     
     # Plot and save confusion matrix
     plot_confusion_matrix(conf_matrix, class_names)

@@ -16,11 +16,12 @@ valid_labels_folder = 'dataset/labels/validation'
 valid_dataset = ForgeDataset(images_folder=valid_images_folder, labels_folder=valid_labels_folder, transform=transform)
 valid_loader = DataLoader(valid_dataset, batch_size=4, shuffle=False, num_workers=4)
 
-state_dict = torch.load('senior-design-proj/Unet/unet_v5.pth', map_location=torch.device('cpu'))
+state_dict = torch.load('senior-design-proj/Unet/unet_v8.pth', map_location=torch.device('cpu'))
 model = UNet(num_classes=16)
 model.load_state_dict(state_dict)
 
-w = torch.tensor([0.902, 0.796, 0.851, 0.801, 0.866, 0.787, 0.848, 0.844, 0.426, 0.872, 1.0, 0.846, 0.826, 0.418, 0.207, 0.02])
+# w = torch.tensor([0.902, 0.796, 0.851, 0.801, 0.866, 0.787, 0.848, 0.844, 0.426, 0.872, 1.0, 0.846, 0.826, 0.418, 0.207, 0.02])
+w = torch.tensor([0.902, 0.796, 0.851, 0.801, 0.866, 0.787, 0.848, 0.844, 0.426, 0.872, 1.0, 0.846, 0.826, 0.418, 0.207, 0.05])
 criterion = nn.CrossEntropyLoss(weight=w)
 # criterion = nn.CrossEntropyLoss()
 
