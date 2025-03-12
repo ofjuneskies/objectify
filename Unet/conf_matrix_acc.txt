@@ -1,0 +1,94 @@
+Unet v3
+Per-class Accuracy:
+  Class 0: 0.0250
+  Class 1: 0.4161
+  Class 2: 0.5882
+  Class 3: 0.8145
+  Class 4: 0.6781
+  Class 5: 0.6751
+  Class 6: 0.3056
+  Class 7: 0.9315
+  Class 8: 0.6476
+  Class 9: 0.8555
+  Class 10: 0.9734
+  Class 11: 0.6678
+  Class 12: 0.8826
+  Class 13: 0.8412
+  Class 14: 0.4409
+  Overall Accuracy: 0.9736
+
+Unet v6
+Per-class Accuracy:
+  Class 0: 0.5709
+  Class 1: 0.5631
+  Class 2: 0.8201
+  Class 3: 0.8702
+  Class 4: 0.8118
+  Class 5: 0.8766
+  Class 6: 0.5733
+  Class 7: 0.9583
+  Class 8: 0.8266
+  Class 9: 0.9322
+  Class 10: 0.9923
+  Class 11: 0.9125
+  Class 12: 0.9283
+  Class 13: 0.9581
+  Class 14: 0.6369
+  Overall Accuracy: 0.9536
+
+Unet v7
+Per-class Accuracy:
+  Class 0: 0.5384
+  Class 1: 0.6081
+  Class 2: 0.7064
+  Class 3: 0.8688
+  Class 4: 0.7808
+  Class 5: 0.8426
+  Class 6: 0.5240
+  Class 7: 0.9485
+  Class 8: 0.8085
+  Class 9: 0.9400
+  Class 10: 0.9870
+  Class 11: 0.8786
+  Class 12: 0.9323
+  Class 13: 0.9320
+  Class 14: 0.5627
+  Overall Accuracy: 0.9619
+
+Unet v8
+Per-class Accuracy:
+  Class 0: 0.6218
+  Class 1: 0.5800
+  Class 2: 0.7024
+  Class 3: 0.8520
+  Class 4: 0.8065
+  Class 5: 0.8671
+  Class 6: 0.5739
+  Class 7: 0.9662
+  Class 8: 0.8237
+  Class 9: 0.9554
+  Class 10: 0.9916
+  Class 11: 0.8720
+  Class 12: 0.9449
+  Class 13: 0.9619
+  Class 14: 0.6712
+  Overall Accuracy: 0.9416
+
+YOLO v11
+  Per-class Accuracy:
+  mannequin: 0.9134
+  suitcase: 0.9649
+  tennisracket: 0.9169
+  boat: 0.9341
+  stopsign: 0.8302
+  plane: 0.7853
+  baseballbat: 0.6704
+  bus: 0.9070
+  mattress: 0.9528
+  skis: 0.9788
+  umbrella: 0.9883
+  snowboard: 0.9713
+  motorcycle: 0.9685
+  car: 0.9830
+  sportsball: 0.9114
+  Overall Accuracy: 0.0781
