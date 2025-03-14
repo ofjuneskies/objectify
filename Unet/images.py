@@ -34,7 +34,7 @@ class_names = {
     14: "sportsball"
 }
 
-state_dict = torch.load('senior-design-proj/Unet/unet_v5.pth', map_location=torch.device('cpu'))
+state_dict = torch.load('senior-design-proj/Unet/unet_v7.pth', map_location=torch.device('cpu'))
 model = UNet(num_classes=16)
 model.load_state_dict(state_dict)
 
@@ -104,4 +104,5 @@ fig.legend(
 )
 
 plt.tight_layout(rect=[0, 0, 0.85, 1])  # Adjust layout to make space for the legend
+plt.savefig("segmentation_results.png", bbox_inches="tight")
 plt.show()

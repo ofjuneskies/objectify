@@ -2,12 +2,14 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 
+
+
 class UNet(nn.Module):
     def __init__(self, num_classes):
         super(UNet, self).__init__()
 
         # Encoder: Pretrained ResNet-34
-        resnet34 = models.resnet34(pretrained=True)
+        resnet34 = models.resnet34(weights='DEFAULT')
         self.encoder1 = nn.Sequential(*list(resnet34.children())[:3])  # First two layers
         self.encoder2 = nn.Sequential(*list(resnet34.children())[3:5])  # Layer 1
         self.encoder3 = resnet34.layer2  # Layer 2
